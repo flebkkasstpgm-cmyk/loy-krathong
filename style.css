@@ -1,0 +1,536 @@
+/* style.css - ธีมกลางคืน ลอยกระทง & โคมยี่เป็ง */
+:root {
+    --night-sky: #0c1445;
+    --night-sky-bottom: #1e2a78;
+    --river-top: #0b1a30;
+    --river-bottom: #000411;
+    --gold: #ffcc33;
+    --glow: rgba(255, 204, 51, 0.6);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Kanit', sans-serif;
+}
+
+body {
+    background: linear-gradient(to bottom, var(--night-sky), var(--night-sky-bottom));
+    height: 100vh;
+    overflow: hidden;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Background elements */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: url('bg.webp') no-repeat center center;
+    background-size: cover;
+}
+
+.sky {
+    height: 60%;
+    background: transparent; /* ลบ Gradient ทิ้งเพื่อให้เห็นรูป bg.webp ชัดๆ */
+    position: relative;
+    overflow: hidden;
+}
+
+.river {
+    height: 40%;
+    background: transparent; /* ลบ Gradient ทิ้ง */
+    position: relative;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: twinkle 2s infinite ease-in-out;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+.wave {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    animation: moveWave 4s infinite linear;
+}
+
+@keyframes moveWave {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* UI Containers */
+.container {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid var(--gold);
+    text-align: center;
+    max-width: 90%;
+    width: 400px;
+    box-shadow: 0 0 30px var(--glow);
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: var(--gold);
+    text-shadow: 0 0 10px var(--glow);
+}
+
+.qr-box {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+/* QR Corner - สำหรับหน้า Animation */
+.qr-corner {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 8px;
+    border-radius: 12px;
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 15px var(--glow);
+    z-index: 100;
+    text-align: center;
+    width: 120px;
+}
+
+.qr-corner p {
+    color: #000;
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: #000;
+}
+
+.btn-primary { background: var(--gold); }
+.btn-primary:hover { 
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px var(--glow);
+    filter: brightness(1.1);
+}
+
+/* Design Grid */
+.design-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 1rem 0;
+}
+
+.design-item {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+}
+
+.design-item.selected {
+    border-color: var(--gold);
+    background: rgba(255, 204, 51, 0.2);
+}
+
+.design-item span {
+    font-size: 2rem;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid var(--gold);
+    background: #000;
+    color: white;
+}
+
+/* Animation Page Objects */
+.floating-obj {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    opacity: 0;
+}
+
+.krathong-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.obj-icon {
+    font-size: 4rem;
+    filter: drop-shadow(0 0 10px var(--gold));
+    animation: floatEffect 3s infinite ease-in-out;
+}
+
+.krathong-img {
+    width: 80px;
+    height: auto;
+    filter: drop-shadow(0 0 15px var(--gold));
+    animation: floatEffect 3s infinite ease-in-out;
+    position: relative;
+    z-index: 1;
+}
+
+.lantern-img {
+    width: 80px;
+    height: auto;
+    filter: drop-shadow(0 0 20px var(--gold)) brightness(1.2);
+    animation: floatEffect 4s infinite ease-in-out;
+}
+
+.obj-info {
+    text-align: center;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+.obj-info strong {
+    color: var(--gold);
+    text-shadow: 0 0 5px rgba(255, 204, 51, 0.5);
+}
+
+@keyframes floatEffect {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+/* Krathong Movement (L to R) */
+@keyframes moveKrathong {
+    0% { left: -150px; opacity: 0; transform: scale(0.8); }
+    10% { opacity: 1; transform: scale(1); }
+    90% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+}
+
+/* Lantern Movement (Horizon to Up) */
+@keyframes moveLantern {
+    0% { bottom: var(--start-y); left: var(--start-x); opacity: 0; transform: scale(0.5); }
+    15% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; }
+    100% { bottom: 110%; left: var(--end-x); opacity: 0; }
+}
+
+/* Krathong Ripple Effect */
+.ripple {
+    position: absolute;
+    width: 40px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    bottom: 0; /* ติดก้นรูปกระทงพอดี */
+    z-index: -1;
+    animation: rippleEffect 3s infinite ease-out;
+    filter: blur(2px);
+}
+
+.wake {
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    left: -40px; 
+    bottom: 5px; /* ติดก้นรูปกระทงพอดี */
+    z-index: -2;
+    pointer-events: none;
+}
+
+.wake::before, .wake::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-left: 3px solid rgba(255, 255, 255, 0.5); /* เป็นเส้นโค้งด้านซ้าย */
+    border-radius: 50% 0 0 50%;
+    top: 0;
+    left: 100%;
+    animation: wakeCurve 2s infinite linear;
+}
+
+.wake::after {
+    animation-delay: 1s;
+}
+
+@keyframes wakeCurve {
+    0% { transform: scale(0.5); opacity: 0; left: 80%; }
+    20% { opacity: 0.6; }
+    100% { transform: scale(1.2) translateX(-50px); opacity: 0; left: 0%; }
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: rippleOuter 3s infinite ease-out;
+}
+
+@keyframes rippleEffect {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.2; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+@keyframes rippleOuter {
+    0% { width: 40px; height: 15px; opacity: 0.5; }
+    100% { width: 80px; height: 30px; opacity: 0; }
+}
+
+/* Water Waves Effect */
+.water-wave {
+    position: absolute;
+    height: 3px; /* หนาขึ้นเป็น 3px */
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent); /* เข้มขึ้นเป็น 0.8 */
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+    animation: waveFloat 5s infinite ease-in-out;
+}
+
+@keyframes waveFloat {
+    0%, 100% { transform: translateX(0) scaleX(1); opacity: 0.3; }
+    50% { transform: translateX(80px) scaleX(1.3); opacity: 0.9; } /* ชัดขึ้นมากเป็น 0.9 */
+}
+
+/* Fireworks Reality Engine - JARVIS V3.5 */
+.firework-launcher {
+    position: absolute;
+    width: 3px;
+    height: 15px;
+    background: linear-gradient(to top, transparent, #fff);
+    z-index: 99;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: launchUp var(--duration) ease-out forwards;
+}
+
+@keyframes launchUp {
+    0% { transform: translateY(100vh) scaleY(2); opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(0) scaleY(1); opacity: 0; }
+}
+
+.explosion-flash {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    /* ปรับ shadow ให้คมขึ้น ไม่ฟุ้งจนขุ่น */
+    box-shadow: 0 0 20px 5px white, 0 0 40px 10px white;
+    z-index: 100;
+    mix-blend-mode: screen;
+    animation: flashFade 0.2s ease-out forwards;
+}
+
+@keyframes flashFade {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(40); opacity: 0; }
+}
+
+.firework {
+    position: absolute;
+    width: 0;
+    height: 0;
+    z-index: 101;
+}
+
+.spark {
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    mix-blend-mode: screen;
+    animation: sparkRealistic var(--duration) cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    /* ลด filter blur ลงเพื่อให้คมชัด */
+    filter: none; 
+}
+
+@keyframes sparkRealistic {
+    0% { 
+        transform: rotate(var(--angle)) translateY(0); 
+        opacity: 1;
+        background-color: #fff;
+        box-shadow: 0 0 5px #fff;
+    }
+    20% {
+        background-color: var(--color);
+        /* ปรับ Shadow ให้กระชับขึ้น ไม่ฟุ้งจนขุ่น */
+        box-shadow: 0 0 8px var(--color), 0 0 15px var(--color);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% { 
+        /* เพิ่มแรงโน้มถ่วงให้ย้อยลงมากกว่าเดิม */
+        transform: rotate(var(--angle)) translateY(var(--distance)) translateY(80px); 
+        opacity: 0;
+        filter: blur(2px);
+    }
+}
+
+/* Water Reflection Glow */
+.reflection {
+    position: absolute;
+    width: 30px;
+    height: 8px;
+    background: var(--gold);
+    bottom: -2px; /* ติดก้นรูปกระทงพอดี */
+    border-radius: 50%;
+    filter: blur(10px);
+    opacity: 0.3;
+    z-index: -1;
+}
+
+/* Speed Boat (เรือแว้น) - Fixed Physics */
+.boat-item {
+    position: absolute;
+    z-index: 200; /* ให้เรือประกาศข่าวอยู่หน้าสุด */
+    pointer-events: none;
+    bottom: var(--boat-y); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.boat-info {
+    background: rgba(0, 255, 255, 0.2);
+    border: 2px solid #00ffff;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    white-space: nowrap;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    animation: boatInfoGlow 1s infinite alternate;
+}
+
+@keyframes boatInfoGlow {
+    from { transform: scale(1); box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+    to { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.8); }
+}
+
+.boat-img {
+    width: 375px; /* ปรับเล็กลงจาก 750px เหลือ 375px */
+    height: auto;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+    /* กลับหัวเรือให้หันไปทางขวา */
+    transform: scaleX(-1); 
+}
+
+@keyframes moveBoat {
+    0% { left: -450px; opacity: 0; } /* ปรับจุดเริ่มให้ใกล้ขึ้นตามขนาดเรือที่เล็กลง */
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { left: 110%; opacity: 0; }
+}
+
+.boat-wake {
+    position: absolute;
+    width: 300px; /* ลดขนาดคลื่นลงตามเรือ */
+    height: 60px;
+    left: -280px; /* ขยับคลื่นมาไว้ท้ายเรือขนาด 375px */
+    bottom: 8px;
+    background: radial-gradient(ellipse at right, rgba(255,255,255,0.6) 0%, transparent 80%);
+    filter: blur(8px);
+    animation: boatWakeEffect 0.2s infinite;
+}
+
+@keyframes boatWakeEffect {
+    0% { transform: scaleY(0.8) skewX(20deg); opacity: 0.6; }
+    50% { transform: scaleY(1.2) skewX(25deg); opacity: 0.3; }
+    100% { transform: scaleY(0.8) skewX(20deg); opacity: 0.6; }
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    color: var(--gold);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    line-height: 1;
+    z-index: 10;
+}
+
+.close-btn:hover {
+    background: var(--gold);
+    color: black;
+    transform: rotate(90deg);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .container { padding: 1.5rem; }
+    h1 { font-size: 1.5rem; }
+}

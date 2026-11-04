@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กรอกข้อมูล - ลอยกระทง & โคมยี่เป็งออนไลน์</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background">
+        <div class="sky" id="sky"></div>
+        <div class="river" id="river"></div>
+    </div>
+
+    <div class="container" style="width: 450px;">
+        <h1 id="form-title">กิจกรรม</h1>
+        
+        <p>เลือกรูปแบบ:</p>
+        <div class="design-grid" id="design-container">
+            <!-- ดีไซน์จะถูกใส่ผ่าน JS -->
+        </div>
+
+        <input type="text" id="user-name" placeholder="ชื่อของคุณ" maxlength="20" required>
+        <textarea id="user-msg" placeholder="คำอธิษฐานของคุณ" rows="3" maxlength="100" required></textarea>
+
+        <button class="btn btn-primary" onclick="startFloating()">✨ เริ่มลอย ✨</button>
+        <a href="select.html" style="color: white; font-size: 0.9rem; text-decoration: none; margin-top: 10px; display: inline-block;">ย้อนกลับ</a>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // จัดการหน้าฟอร์ม
+        document.addEventListener('DOMContentLoaded', initForm);
+    </script>
+</body>
+</html>
