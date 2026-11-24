@@ -1,9 +1,9 @@
-/* script.js - AI Engine V3.15 (Announcer Boat Edition) */
+/* script.js - AI Engine V3.20 (Custom Photo Krathong Edition) */
 
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzBUM0P60rsa5gmuGvHfoSLVbqthvLWFyHgxXuOqlEi2eeqEDGYG116w2Ocy9QDakfT/exec"; 
 
 const designs = {
-    krathong: ['T1.png', 'T2.png', 'T3.png', 'T4.png', 'T5.png', 'T6.png'],
+    krathong: ['T1.png', 'T2.png', 'T3.png', 'T4.png', 'T5.png', 'T6.png', 'PHOTO_CUSTOM'],
     lantern: ['C1.png', 'C2.png']
 };
 
@@ -11,6 +11,7 @@ let krathongObjects = [];
 let activeIds = new Set(); 
 let animationFrameId = null;
 let isSubmitting = false;
+window.customPhotoBase64 = null;
 
 // --- UTILS ---
 function createBackground() {
@@ -30,6 +31,49 @@ function createBackground() {
     }
 }
 
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            // สร้าง Canvas ย่อรูปให้ขนาดพอดีกับกระทง (120x120 px)
+            const canvas = document.createElement('canvas');
+            const targetSize = 120;
+            canvas.width = targetSize;
+            canvas.height = targetSize;
+            const ctx = canvas.getContext('2d');
+
+            // Crop กึ่งกลางรูป (Center Crop)
+            const minDim = Math.min(img.width, img.height);
+            const startX = (img.width - minDim) / 2;
+            const startY = (img.height - minDim) / 2;
+
+            ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+
+            // บีบอัดเป็น JPEG ขนาดเบามาก (~5 - 12 KB)
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+            window.customPhotoBase64 = compressedBase64;
+            window.selectedDesign = compressedBase64;
+
+            // แสดงพรีวิว
+            const previewWrap = document.getElementById('photo-preview-wrap');
+            const previewImg = document.getElementById('photo-preview-img');
+            const sizeText = document.getElementById('photo-size-text');
+            if (previewWrap && previewImg) {
+                previewImg.src = compressedBase64;
+                previewWrap.style.display = 'flex';
+                const sizeKb = Math.round(compressedBase64.length * 0.75 / 1024);
+                if (sizeText) sizeText.innerText = `✨ ย่อรูปสำเร็จ (${sizeKb} KB) พร้อมลอยครับ`;
+            }
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 function initForm() {
     createBackground();
     const urlParams = new URLSearchParams(window.location.search);
@@ -44,14 +88,34 @@ function initForm() {
         const displayItems = mode.toLowerCase() === 'lantern' ? [items[0]] : items;
         displayItems.forEach((item, index) => {
             const div = document.createElement('div');
-            div.className = 'design-item';
-            div.innerHTML = item.endsWith('.png') ? `<img src="${item}" style="width: 80px; height: auto;">` : `<span>${item}</span>`;
-            div.onclick = () => {
-                document.querySelectorAll('.design-item').forEach(d => d.classList.remove('selected'));
+            if (item === 'PHOTO_CUSTOM') {
+                div.className = 'design-item photo-select-card';
+                div.innerHTML = `
+                    <div style="font-size: 1.8rem;">📷</div>
+                    <span style="font-size: 0.8rem; font-weight: bold; color: var(--gold);">ใส่รูปตัวเอง</span>
+                `;
+                div.onclick = () => {
+                    document.querySelectorAll('.design-item').forEach(d => d.classList.remove('selected'));
+                    div.classList.add('selected');
+                    const photoSection = document.getElementById('photo-upload-container');
+                    if (photoSection) photoSection.style.display = 'block';
+                    window.selectedDesign = window.customPhotoBase64 ? window.customPhotoBase64 : 'PHOTO_CUSTOM';
+                };
+            } else {
+                div.className = 'design-item';
+                div.innerHTML = item.endsWith('.png') ? `<img src="${item}" style="width: 80px; height: auto;">` : `<span>${item}</span>`;
+                div.onclick = () => {
+                    document.querySelectorAll('.design-item').forEach(d => d.classList.remove('selected'));
+                    div.classList.add('selected');
+                    const photoSection = document.getElementById('photo-upload-container');
+                    if (photoSection) photoSection.style.display = 'none';
+                    window.selectedDesign = item;
+                };
+            }
+            if (index === 0) {
                 div.classList.add('selected');
                 window.selectedDesign = item;
-            };
-            if (index === 0) { div.classList.add('selected'); window.selectedDesign = item; }
+            }
             container.appendChild(div);
         });
     }
@@ -59,15 +123,24 @@ function initForm() {
 
 async function startFloating() {
     if (isSubmitting) return;
-    const name = document.getElementById('user-name').value;
-    const msg = document.getElementById('user-msg').value;
+    const name = document.getElementById('user-name').value.trim();
+    const msg = document.getElementById('user-msg').value.trim();
     const mode = new URLSearchParams(window.location.search).get('mode') || 'krathong';
     
     if (!name || !msg) { alert('กรุณากรอกชื่อและคำอธิษฐานครับเจ้านาย'); return; }
 
+    // ตรวจสอบกรณีเลือกกระทงรูปตัวเอง แต่ยังไม่ได้อัปโหลดรูป
+    if (window.selectedDesign === 'PHOTO_CUSTOM' || (document.querySelector('.photo-select-card.selected') && !window.customPhotoBase64)) {
+        alert('กรุณาเลือกรูปภาพสำหรับกระทงรูปของคุณก่อนเริ่มลอยครับ 📷');
+        return;
+    }
+
     isSubmitting = true;
     let design = window.selectedDesign || (mode === 'krathong' ? 'T1.png' : 'C1.png');
-    if (!design.endsWith('.png')) design += '.png';
+    const isPhoto = design.startsWith('data:image/') || design.startsWith('http');
+    if (!isPhoto && !design.endsWith('.png')) {
+        design += '.png';
+    }
 
     const data = { mode, name, msg, design };
 
@@ -87,10 +160,10 @@ async function startFloating() {
 // --- ENGINE ---
 const CANAL = { minY: 2, maxY: 5, spacing: 140 }; 
 
-
 function createKrathong(data, isUser = false, isNew = false) {
-    const cleanDesign = data.design.endsWith('.png') ? data.design : data.design + '.png';
-    const dataKey = "KRATHONG_" + data.name + data.msg + cleanDesign;
+    const isPhoto = data.design.startsWith('data:image/') || data.design.startsWith('http');
+    const cleanDesign = isPhoto ? data.design : (data.design.endsWith('.png') ? data.design : data.design + '.png');
+    const dataKey = "KRATHONG_" + data.name + data.msg + (isPhoto ? cleanDesign.slice(0, 40) : cleanDesign);
     if (activeIds.has(dataKey)) return;
     activeIds.add(dataKey);
 
@@ -99,12 +172,22 @@ function createKrathong(data, isUser = false, isNew = false) {
     const el = document.createElement('div');
     el.className = 'floating-obj krathong-item';
     
+    const visualContent = isPhoto 
+        ? `<div class="photo-krathong-unit">
+               <div class="photo-candle-flame">🪔</div>
+               <div class="photo-frame-box">
+                   <img src="${cleanDesign}" class="photo-krathong-img" alt="รูปผู้ลอย">
+               </div>
+               <div class="photo-lotus-base"></div>
+           </div>`
+        : `<img src="${cleanDesign}" class="krathong-img">`;
+
     el.innerHTML = `
         <div class="krathong-wrap">
             <div class="ripple"></div>
             <div class="reflection"></div>
             <div class="wake"></div>
-            <img src="${cleanDesign}" class="krathong-img">
+            ${visualContent}
         </div>
         <div class="obj-info">
             <strong>${data.name}</strong><br>
@@ -130,10 +213,11 @@ function createKrathong(data, isUser = false, isNew = false) {
 }
 
 function createLantern(data, container, isNew = false) {
-    let cleanDesign = data.design.endsWith('.png') ? data.design : data.design + '.png';
-    if (cleanDesign.startsWith('T')) cleanDesign = 'C1.png'; 
+    const isPhoto = data.design.startsWith('data:image/') || data.design.startsWith('http');
+    let cleanDesign = isPhoto ? data.design : (data.design.endsWith('.png') ? data.design : data.design + '.png');
+    if (!isPhoto && cleanDesign.startsWith('T')) cleanDesign = 'C1.png'; 
     
-    const dataKey = "LANTERN_" + data.name + data.msg + cleanDesign;
+    const dataKey = "LANTERN_" + data.name + data.msg + (isPhoto ? cleanDesign.slice(0, 40) : cleanDesign);
     if (activeIds.has(dataKey)) return;
     activeIds.add(dataKey);
 
@@ -155,7 +239,11 @@ function createLantern(data, container, isNew = false) {
     obj.style.animation = `moveLantern ${duration}s infinite linear backwards`;
     obj.style.animationDelay = delay + 's';
     
-    obj.innerHTML = `<img src="${cleanDesign}" class="lantern-img">
+    const visualContent = isPhoto 
+        ? `<div class="photo-frame-box" style="border-radius: 50%;"><img src="${cleanDesign}" class="photo-krathong-img"></div>`
+        : `<img src="${cleanDesign}" class="lantern-img">`;
+
+    obj.innerHTML = `${visualContent}
         <div class="obj-info">
             <strong>${data.name}</strong><br>
             <span style="font-size: 0.7rem;">${data.msg}</span>
@@ -214,8 +302,9 @@ async function syncCloudData(isInitial = false) {
         const area = document.getElementById('float-area');
         if (data && Array.isArray(data)) {
             data.forEach(item => {
-                const cleanDesign = item.design.endsWith('.png') ? item.design : item.design + '.png';
-                const dataKey = (item.mode.toLowerCase() === 'krathong' ? "KRATHONG_" : "LANTERN_") + item.name + item.msg + cleanDesign;
+                const isPhoto = item.design && (item.design.startsWith('data:image/') || item.design.startsWith('http'));
+                const cleanDesign = isPhoto ? item.design : (item.design.endsWith('.png') ? item.design : item.design + '.png');
+                const dataKey = (item.mode.toLowerCase() === 'krathong' ? "KRATHONG_" : "LANTERN_") + item.name + item.msg + (isPhoto ? cleanDesign.slice(0, 40) : cleanDesign);
                 
                 if (!activeIds.has(dataKey)) {
                     if (!isInitial) {
